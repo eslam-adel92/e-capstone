@@ -1,13 +1,18 @@
-# Python CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-python/ for more details
-#
 version: 2.1
-jobs:
-  build:
+executors:
+  docker:
     docker:
-    # Use the same Docker base as the project
+      - image: docker
+  python:
+    docker:
       - image: python:3.7.3-stretch
+  aws:
+    docker:
+      - image: amazon/aws-cli
+
+jobs:
+  lint:
+    executor: python
     working_directory: ~/repo
     steps:
       - checkout
@@ -18,13 +23,25 @@ jobs:
             # Install hadolint
             wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
                 chmod +x /bin/hadolint
-      # run lint!
       - run:
           name: run lint
           command: |
             hadolint Dockerfile
 
+  build:
+    machine: true
+    steps:
+      - checkout
+      - run: |
+          docker login -u ${DOCKERHUB_USERNAME} -p ${DOCKERHUB_PASS}
+          docker build -t eslam2017/e-capstone:${CIRCLE_WORKFLOW_ID:0:7} .
+          docker push eslam2017/e-capstone:${CIRCLE_WORKFLOW_ID:0:7}
+
+
 workflows:
   e-capstone:
     jobs:
-      - build
+      - lint
+      - build:
+          requires:
+            - "lint"
