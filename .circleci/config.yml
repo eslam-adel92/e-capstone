@@ -48,28 +48,31 @@ jobs:
     machine: true
     steps:
       - checkout
-      - run: |
-          docker login -u ${DOCKERHUB_USERNAME} -p ${DOCKERHUB_PASS}
-          docker build -t eslam2017/e-capstone:${CIRCLE_WORKFLOW_ID:0:7} .
-          docker push eslam2017/e-capstone:${CIRCLE_WORKFLOW_ID:0:7}
-          docker push eslam2017/e-capstone:latest
+      - run:
+          name: Build docker image, tag it and push it to docker hub.
+          command: |
+            docker login -u ${DOCKERHUB_USERNAME} -p ${DOCKERHUB_PASS}
+            docker build -t eslam2017/e-capstone:${CIRCLE_WORKFLOW_ID:0:7} .
+            docker push eslam2017/e-capstone:${CIRCLE_WORKFLOW_ID:0:7}
+            docker tag eslam2017/e-capstone:${CIRCLE_WORKFLOW_ID:0:7} eslam2017/e-capstone:latest
+            docker push eslam2017/e-capstone:latest
 
-  # deploy_eks_cluster:
-  #   executor: aws
-  #   steps:
-  #     - run:
-  #       name: Install dependencies.
-  #       command: |
-  #         curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-  #         sudo mv /tmp/eksctl /usr/local/bin
-  #         eksctl version
-  #     - run:
-  #       name: Creating the EKS cluster.
-  #       command: |
-  #         eksctl create cluster --name e-capstone-${CIRCLE_WORKFLOW_ID:0:7} --fargate --asg-access
-  #     - destroy_environment:
-  #         workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-  #         event: on_fail
+  deploy_eks_cluster:
+    executor: aws
+    steps:
+      - run:
+          name: Install dependencies.
+          command: |
+            curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+            sudo mv /tmp/eksctl /usr/local/bin
+            eksctl version
+      - run:
+          name: Creating the EKS cluster.
+          command: |
+            eksctl create cluster --name e-capstone-${CIRCLE_WORKFLOW_ID:0:7} --fargate --asg-access
+      - destroy_environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+          event: on_fail
 
 
 
