@@ -124,13 +124,13 @@ workflows:
       - deploy_eks_cluster:
           requires:
             - "build"
-      # - aws-eks/update-container-image:
-      #     cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
-      #     resource-name: "e-capstone"
-      #     container-image-updates: "e-capstone=e-capstone-${CIRCLE_WORKFLOW_ID:0:7}"
-      #     record: true
-      #     requires:
-      #       - "deploy_eks_cluster"
+      - aws-eks/update-container-image:
+          cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
+          resource-name: "e-capstone"
+          container-image-updates: "e-capstone=e-capstone-${CIRCLE_WORKFLOW_ID:0:7}"
+          record: true
+          requires:
+            - "deploy_eks_cluster"
 
 
 # aws eks update-kubeconfig --region us-west-2 --name help --kubeconfig config-2
