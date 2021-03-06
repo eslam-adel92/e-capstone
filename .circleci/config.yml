@@ -1,3 +1,4 @@
+# Udacity DevOps program Capstone project
 version: 2.1
 executors:
   docker:
@@ -10,6 +11,21 @@ executors:
     docker:
       - image: amazon/aws-cli
 
+commands:
+  destroy_environment:
+    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+    parameters:
+      workflow_id:
+        type: string
+      event:
+        type: string
+    steps:
+      - run:
+          name: Destroy environments <<parameters.workflow_id>>
+          when: <<parameters.event>>
+          command: |
+            eksctl delete cluster --name e-capstone-<<parameters.workflow_id>>
+
 jobs:
   lint:
     executor: python
@@ -17,7 +33,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: install dependencies
+          name: Install dependencies
           command: |
             pip install --no-cache-dir Flask==1.1.2
             # Install hadolint
@@ -36,6 +52,26 @@ jobs:
           docker login -u ${DOCKERHUB_USERNAME} -p ${DOCKERHUB_PASS}
           docker build -t eslam2017/e-capstone:${CIRCLE_WORKFLOW_ID:0:7} .
           docker push eslam2017/e-capstone:${CIRCLE_WORKFLOW_ID:0:7}
+          docker push eslam2017/e-capstone:latest
+
+  deploy_eks_cluster:
+    executor: aws
+    steps:
+      - run:
+        name: Install dependencies.
+        command: |
+          curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+          sudo mv /tmp/eksctl /usr/local/bin
+          eksctl version
+      - run:
+        name: Creating the EKS cluster.
+        command: |
+          eksctl create cluster --name e-capstone-${CIRCLE_WORKFLOW_ID:0:7} --fargate --asg-access
+      - destroy_environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+          event: on_fail
+
+
 
 
 workflows:
@@ -45,3 +81,8 @@ workflows:
       - build:
           requires:
             - "lint"
+
+
+# aws eks update-kubeconfig --region us-west-2 --name help --kubeconfig config-2
+
+# eksctl create cluster --name my-cluster --region us-west-2 --fargate
