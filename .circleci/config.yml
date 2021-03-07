@@ -82,7 +82,6 @@ jobs:
           name: Creating the EKS cluster.
           command: |
             kubectl version --short --client
-            if [ "$?" -ne 0 ]
             # eksctl create cluster --name e-capstone-${CIRCLE_WORKFLOW_ID:0:7} --fargate --asg-access --kubeconfig config
             # kubectl get nodes
             touch config
