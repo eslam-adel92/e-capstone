@@ -81,7 +81,8 @@ jobs:
             mv ./kubectl /usr/local/bin
             kubectl version --short --client
       - run:
-        name:  Get old cluster name.
+          name:  Get old cluster name.
+          command: |
             OLD_CLUSTER=$(eksctl get cluster | grep -I "e-capstone*" | awk '{print $1}')
             echo ${OLD_CLUSTER}
       - run:
