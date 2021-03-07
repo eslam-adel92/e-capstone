@@ -85,12 +85,12 @@ jobs:
           name: Creating the EKS cluster.
           command: |
             kubectl version --short --client
-            # eksctl create cluster --name e-capstone-${CIRCLE_WORKFLOW_ID:0:7} --fargate --asg-access
-            # kubectl get nodes
+            eksctl create cluster --name e-capstone-${CIRCLE_WORKFLOW_ID:0:7} --fargate --asg-access
+            kubectl get nodes
             pwd && ls -la && ls -la /root/
             # cat ~/.kube/config
-            # cp -r ~/.kube/ .
-            mkdir .kube/ && touch .kube/config
+            cp -r ~/.kube/ .
+            # mkdir .kube/ && touch .kube/config
             
       - persist_to_workspace:
           root: ~/
@@ -114,27 +114,27 @@ jobs:
       - run: 
           name: Install dependencies.
           command: |
-            pwd && ls -la . && ls -la ~/app/
-            # sudo yum -y install tar gzip curl
+            # pwd && ls -la . && ls -la ~/app/
             curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
             sudo mv /tmp/eksctl /usr/local/bin
             eksctl version
             curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/kubectl
             chmod +x ./kubectl
             sudo mv ./kubectl /usr/local/bin
-            kubectl version --short --client            
-      # - aws-eks/update-kubeconfig-with-authenticator:
-      #     cluster-name: << parameters.cluster-name >>
-      #     install-kubectl: true
-      #     kubeconfig-file-path: .kube/config
-      # - kubernetes/create-or-update-resource:
-      #     resource-file-path: ".circleci/k8s-files/e-capstone.yml"
-      #     resource-name: "e-capstone"
-      #     get-rollout-status: true
-      #     show-kubectl-command: true
-      # - destroy_environment:
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-      #     event: on_fail
+            kubectl version --short --client
+            cat ~/app/.kube/config        
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+          install-kubectl: true
+          kubeconfig-file-path: ~/app/.kube/config
+      - kubernetes/create-or-update-resource:
+          resource-file-path: ".circleci/k8s-files/e-capstone.yml"
+          resource-name: "e-capstone"
+          get-rollout-status: true
+          show-kubectl-command: true
+      - destroy_environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+          event: on_fail
 
 
 workflows:
@@ -152,13 +152,13 @@ workflows:
           requires:
             - "deploy_eks_cluster"
             # - "build"
-      # - aws-eks/update-container-image:
-      #     cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
-      #     resource-name: "e-capstone"
-      #     container-image-updates: "e-capstone=e-capstone-${CIRCLE_WORKFLOW_ID:0:7}"
-      #     record: true
-      #     requires:
-      #       - "create-deployment"
+      - aws-eks/update-container-image:
+          cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
+          resource-name: "e-capstone"
+          container-image-updates: "e-capstone=e-capstone-${CIRCLE_WORKFLOW_ID:0:7}"
+          record: true
+          requires:
+            - "create-deployment"
 
 
 # aws eks update-kubeconfig --region us-west-2 --name help --kubeconfig config-2
