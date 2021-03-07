@@ -177,7 +177,7 @@ workflows:
             - "build"
       - deploy_k8s_app:
           requires:
-            - "build"
+            - "deploy_eks_cluster"
       # - create-deployment:
       #     cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
       #     requires:
