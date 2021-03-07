@@ -90,6 +90,7 @@ jobs:
             # pwd && ls -la && ls -la /root/
             # cat ~/.kube/config
             # cp -r ~/.kube/ .
+            mkdir .kube/ && touch .kube/config
             
       - persist_to_workspace:
           root: ~/
