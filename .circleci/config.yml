@@ -82,10 +82,10 @@ jobs:
           name: Creating the EKS cluster.
           command: |
             kubectl version --short --client
-            # eksctl create cluster --name e-capstone-${CIRCLE_WORKFLOW_ID:0:7} --fargate --asg-access --kubeconfig config
-            # kubectl get nodes
-            touch config
-            pwd && ls -la
+            eksctl create cluster --name e-capstone-${CIRCLE_WORKFLOW_ID:0:7} --fargate --asg-access --kubeconfig config
+            kubectl get nodes
+            # touch config
+            # pwd && ls -la
       - persist_to_workspace:
           root: ~/
           paths:
@@ -108,6 +108,7 @@ jobs:
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: << parameters.cluster-name >>
           install-kubectl: true
+          kubeconfig-file-path: project/config
       - kubernetes/create-or-update-resource:
           resource-file-path: ".circleci/k8s-files/e-capstone.yaml"
           resource-name: "e-capstone"
@@ -125,17 +126,17 @@ workflows:
       - deploy_eks_cluster:
           requires:
             - "build"
-      # - create-deployment:
-      #     cluster-name: eks-demo-deployment
-      #     requires:
-      #       - "deploy_eks_cluster"
-      # - aws-eks/update-container-image:
-      #     cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
-      #     resource-name: "e-capstone"
-      #     container-image-updates: "e-capstone=e-capstone-${CIRCLE_WORKFLOW_ID:0:7}"
-      #     record: true
-      #     requires:
-      #       - "create-deployment"
+      - create-deployment:
+          cluster-name: eks-demo-deployment
+          requires:
+            - "deploy_eks_cluster"
+      - aws-eks/update-container-image:
+          cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
+          resource-name: "e-capstone"
+          container-image-updates: "e-capstone=e-capstone-${CIRCLE_WORKFLOW_ID:0:7}"
+          record: true
+          requires:
+            - "create-deployment"
 
 
 # aws eks update-kubeconfig --region us-west-2 --name help --kubeconfig config-2
