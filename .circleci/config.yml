@@ -89,8 +89,7 @@ jobs:
             pwd && ls -la && ls -la /root/
             # cat ~/.kube/config
             cp -r ~/.kube/ .
-            # mkdir .kube/ && touch .kube/config
-            
+            # mkdir .kube/ && touch .kube/config            
       - persist_to_workspace:
           root: ~/
           paths:
@@ -99,42 +98,71 @@ jobs:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
           event: on_fail
 
-  create-deployment:
-    executor: aws-eks/python3
-    parameters:
-      cluster-name:
-        description: |
-          Name of the EKS cluster
-        type: string
+
+  deploy_k8s_app:
+    executor: aws
+    working_directory: ~/app
     steps:
       - checkout
       - attach_workspace:
           at: ~/
-      - run: 
+      - run:
           name: Install dependencies.
           command: |
-            # pwd && ls -la . && ls -la ~/app/
+            yum -y install tar gzip curl
             curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-            sudo mv /tmp/eksctl /usr/local/bin
+            mv /tmp/eksctl /usr/local/bin
             eksctl version
             curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/kubectl
             chmod +x ./kubectl
-            sudo mv ./kubectl /usr/local/bin
+            mv ./kubectl /usr/local/bin
             kubectl version --short --client
+      - run:
+          name: Deploy the e-capstne app to the EKS cluster.
+          command: |
             cat ~/app/.kube/config
             sed -i 's/IMAGE_TAG/${CIRCLE_WORKFLOW_ID:0:7}/' .circleci/k8s-files/e-capstone.yml
-      - aws-eks/update-kubeconfig-with-authenticator:
-          cluster-name: << parameters.cluster-name >>
-          install-kubectl: true
-          kubeconfig-file-path: "~/app/.kube/config"
-      - kubernetes/create-or-update-resource:
-          resource-file-path: ".circleci/k8s-files/e-capstone.yml"
-          # resource-name: "e-capstone"
-          get-rollout-status: true
-          show-kubectl-command: true
+            kubectl --kubconfig ~/app/.kube/config apply -f .circleci/k8s-files/e-capstone.yml
       - destroy_environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
           event: on_fail
+
+  # create-deployment:
+  #   executor: aws-eks/python3
+  #   parameters:
+  #     cluster-name:
+  #       description: |
+  #         Name of the EKS cluster
+  #       type: string
+  #   steps:
+  #     - checkout
+  #     - attach_workspace:
+  #         at: ~/
+  #     - run: 
+  #         name: Install dependencies.
+  #         command: |
+  #           # pwd && ls -la . && ls -la ~/app/
+  #           curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+  #           sudo mv /tmp/eksctl /usr/local/bin
+  #           eksctl version
+  #           curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/kubectl
+  #           chmod +x ./kubectl
+  #           sudo mv ./kubectl /usr/local/bin
+  #           kubectl version --short --client
+  #           cat ~/app/.kube/config
+  #           sed -i 's/IMAGE_TAG/${CIRCLE_WORKFLOW_ID:0:7}/' .circleci/k8s-files/e-capstone.yml
+  #     - aws-eks/update-kubeconfig-with-authenticator:
+  #         cluster-name: << parameters.cluster-name >>
+  #         install-kubectl: true
+  #         kubeconfig-file-path: "~/app/.kube/config"
+  #     - kubernetes/create-or-update-resource:
+  #         resource-file-path: ".circleci/k8s-files/e-capstone.yml"
+  #         # resource-name: "e-capstone"
+  #         get-rollout-status: true
+  #         show-kubectl-command: true
+  #     - destroy_environment:
+  #         workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+  #         event: on_fail
 
 
 workflows:
@@ -147,10 +175,13 @@ workflows:
       - deploy_eks_cluster:
           requires:
             - "build"
-      - create-deployment:
-          cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
+      - deploy_k8s_app:
           requires:
-            - "deploy_eks_cluster"
+            - "build"
+      # - create-deployment:
+      #     cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
+      #     requires:
+      #       - "deploy_eks_cluster"
             # - "build"
       # - aws-eks/update-container-image:
       #     cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
