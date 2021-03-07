@@ -108,10 +108,11 @@ jobs:
       - checkout
       - attach_workspace:
           at: ~/
+      - run: ls -la . && ls -la /root/
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: << parameters.cluster-name >>
           install-kubectl: true
-          kubeconfig-file-path: /root/.kube/config
+          # kubeconfig-file-path: /root/.kube/config
       - kubernetes/create-or-update-resource:
           resource-file-path: ".circleci/k8s-files/e-capstone.yaml"
           resource-name: "e-capstone"
