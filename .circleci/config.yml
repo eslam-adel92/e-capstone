@@ -104,8 +104,6 @@ jobs:
     working_directory: ~/app
     steps:
       - checkout
-      - attach_workspace:
-          at: ~/
       - run:
           name: Install dependencies.
           command: |
@@ -117,6 +115,8 @@ jobs:
             chmod +x ./kubectl
             mv ./kubectl /usr/local/bin
             kubectl version --short --client
+      - attach_workspace:
+          at: ~/
       - run:
           name: Deploy the e-capstne app to the EKS cluster.
           command: |
