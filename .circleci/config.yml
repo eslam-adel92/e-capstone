@@ -114,14 +114,14 @@ jobs:
       - run: 
           name: Install dependencies.
           command: |
-            pwd && ls -la . && ls -la ~/
-            yum -y install tar gzip curl
+            pwd && ls -la . && ls -la ~/app/
+            # sudo yum -y install tar gzip curl
             curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-            mv /tmp/eksctl /usr/local/bin
+            sudo mv /tmp/eksctl /usr/local/bin
             eksctl version
             curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/kubectl
             chmod +x ./kubectl
-            mv ./kubectl /usr/local/bin
+            sudo mv ./kubectl /usr/local/bin
             kubectl version --short --client            
       # - aws-eks/update-kubeconfig-with-authenticator:
       #     cluster-name: << parameters.cluster-name >>
