@@ -81,6 +81,10 @@ jobs:
             mv ./kubectl /usr/local/bin
             kubectl version --short --client
       - run:
+        name:  Get old cluster name.
+            OLD_CLUSTER=$(eksctl get cluster | grep -I "e-capstone*" | awk '{print $1}')
+            echo ${OLD_CLUSTER}
+      - run:
           name: Creating the EKS cluster.
           command: |
             kubectl version --short --client
@@ -121,7 +125,7 @@ jobs:
           name: Deploy the e-capstne app to the EKS cluster.
           command: |
             cat ~/app/.kube/config
-            sed -i 's/IMAGE_TAG/${CIRCLE_WORKFLOW_ID:0:7}/g' .circleci/k8s-files/e-capstone.yml
+            sed -i "s/IMAGE_TAG/${CIRCLE_WORKFLOW_ID:0:7}/g" .circleci/k8s-files/e-capstone.yml
             kubectl --kubeconfig ~/app/.kube/config apply -f .circleci/k8s-files/e-capstone.yml
       - destroy_environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
