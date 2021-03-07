@@ -83,14 +83,14 @@ jobs:
           command: |
             kubectl version --short --client
             if [ "$?" -ne 0 ]
-            # eksctl create cluster --name e-capstone-${CIRCLE_WORKFLOW_ID:0:7} --fargate --asg-access
+            # eksctl create cluster --name e-capstone-${CIRCLE_WORKFLOW_ID:0:7} --fargate --asg-access --kubeconfig config
             # kubectl get nodes
-            mkdir /root/.kube
+            touch config
             pwd && ls -la
       - persist_to_workspace:
           root: ~/
           paths:
-            - /root/.kube
+            - project/config
       - destroy_environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
           event: on_fail
@@ -126,17 +126,17 @@ workflows:
       - deploy_eks_cluster:
           requires:
             - "build"
-      - create-deployment:
-          cluster-name: eks-demo-deployment
-          requires:
-            - "deploy_eks_cluster"
-      - aws-eks/update-container-image:
-          cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
-          resource-name: "e-capstone"
-          container-image-updates: "e-capstone=e-capstone-${CIRCLE_WORKFLOW_ID:0:7}"
-          record: true
-          requires:
-            - "create-deployment"
+      # - create-deployment:
+      #     cluster-name: eks-demo-deployment
+      #     requires:
+      #       - "deploy_eks_cluster"
+      # - aws-eks/update-container-image:
+      #     cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
+      #     resource-name: "e-capstone"
+      #     container-image-updates: "e-capstone=e-capstone-${CIRCLE_WORKFLOW_ID:0:7}"
+      #     record: true
+      #     requires:
+      #       - "create-deployment"
 
 
 # aws eks update-kubeconfig --region us-west-2 --name help --kubeconfig config-2
