@@ -121,7 +121,7 @@ jobs:
           name: Deploy the e-capstne app to the EKS cluster.
           command: |
             cat ~/app/.kube/config
-            sed -i 's/IMAGE_TAG/${CIRCLE_WORKFLOW_ID:0:7}/' .circleci/k8s-files/e-capstone.yml
+            sed -i 's/IMAGE_TAG/${CIRCLE_WORKFLOW_ID:0:7}/g' .circleci/k8s-files/e-capstone.yml
             kubectl --kubconfig ~/app/.kube/config apply -f .circleci/k8s-files/e-capstone.yml
       - destroy_environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
