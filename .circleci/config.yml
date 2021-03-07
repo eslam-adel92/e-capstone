@@ -33,7 +33,7 @@ commands:
 jobs:
   lint:
     executor: python
-    working_directory: ~/repo
+    working_directory: ~/app
     steps:
       - checkout
       - run:
@@ -50,6 +50,7 @@ jobs:
 
   build:
     machine: true
+    working_directory: ~/app
     steps:
       - checkout
       - run:
@@ -63,6 +64,7 @@ jobs:
 
   deploy_eks_cluster:
     executor: aws
+    working_directory: ~/app
     steps:
       - checkout
       - run:
@@ -92,7 +94,7 @@ jobs:
       - persist_to_workspace:
           root: ~/
           paths:
-            - .kube
+            - app
       - destroy_environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
           event: on_fail
@@ -118,6 +120,9 @@ jobs:
           resource-name: "e-capstone"
           get-rollout-status: true
           show-kubectl-command: true
+      - destroy_environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+          event: on_fail
 
 
 workflows:
