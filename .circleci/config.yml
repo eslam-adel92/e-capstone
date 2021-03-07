@@ -126,15 +126,16 @@ workflows:
       - build:
           requires:
             - "lint"
-      - deploy_eks_cluster:
-          requires:
-            - "build"
+      # - deploy_eks_cluster:
+      #     requires:
+      #       - "build"
       - create-deployment:
-          cluster-name: eks-demo-deployment
+          cluster-name: e-capstone-0ba7b88
           requires:
-            - "deploy_eks_cluster"
+            # - "deploy_eks_cluster"
+            - "build"
       - aws-eks/update-container-image:
-          cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
+          cluster-name: e-capstone-0ba7b88
           resource-name: "e-capstone"
           container-image-updates: "e-capstone=e-capstone-${CIRCLE_WORKFLOW_ID:0:7}"
           record: true
