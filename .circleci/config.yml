@@ -80,7 +80,6 @@ jobs:
             chmod +x ./kubectl
             mv ./kubectl /usr/local/bin
             kubectl version --short --client
-
       - run:
           name: Creating the EKS cluster.
           command: |
@@ -122,14 +121,15 @@ jobs:
             chmod +x ./kubectl
             sudo mv ./kubectl /usr/local/bin
             kubectl version --short --client
-            cat ~/app/.kube/config        
+            cat ~/app/.kube/config
+            sed -i 's/IMAGE_TAG/${CIRCLE_WORKFLOW_ID:0:7}/' .circleci/k8s-files/e-capstone.yml
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: << parameters.cluster-name >>
           install-kubectl: true
-          kubeconfig-file-path: ~/app/.kube/config
+          kubeconfig-file-path: "~/app/.kube/config"
       - kubernetes/create-or-update-resource:
           resource-file-path: ".circleci/k8s-files/e-capstone.yml"
-          resource-name: "e-capstone"
+          # resource-name: "e-capstone"
           get-rollout-status: true
           show-kubectl-command: true
       - destroy_environment:
@@ -152,13 +152,13 @@ workflows:
           requires:
             - "deploy_eks_cluster"
             # - "build"
-      - aws-eks/update-container-image:
-          cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
-          resource-name: "e-capstone"
-          container-image-updates: "e-capstone=e-capstone-${CIRCLE_WORKFLOW_ID:0:7}"
-          record: true
-          requires:
-            - "create-deployment"
+      # - aws-eks/update-container-image:
+      #     cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
+      #     resource-name: "e-capstone"
+      #     container-image-updates: "e-capstone=e-capstone-${CIRCLE_WORKFLOW_ID:0:7}"
+      #     record: true
+      #     requires:
+      #       - "create-deployment"
 
 
 # aws eks update-kubeconfig --region us-west-2 --name help --kubeconfig config-2
