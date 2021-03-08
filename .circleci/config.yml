@@ -89,7 +89,14 @@ jobs:
           name: Creating the EKS cluster.
           command: |
             kubectl version --short --client
-            eksctl create cluster --name e-capstone-${CIRCLE_WORKFLOW_ID:0:7} --fargate --asg-access
+            # eksctl create cluster --name e-capstone-${CIRCLE_WORKFLOW_ID:0:7} --fargate --asg-access
+            eksctl create cluster \
+                    --name e-capstone-${CIRCLE_WORKFLOW_ID:0:7} \
+                    --tags "Name=e-capstone-${CIRCLE_WORKFLOW_ID:0:7}" \
+                    --with-oidc \
+                    --nodegroup-name e-capstone-${CIRCLE_WORKFLOW_ID:0:7} \
+                    --node-type t2.micro\
+                    --node-volume-size 30 \                    
             kubectl get nodes
             pwd && ls -la && ls -la /root/
             # cat ~/.kube/config
