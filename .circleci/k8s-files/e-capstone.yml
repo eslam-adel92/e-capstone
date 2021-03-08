@@ -3,7 +3,9 @@ kind: Service
 metadata:
   name:  e-capstone
   annotations:
-    # service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "NAME=e-capstone-IMAGE_TAG"
+    service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "NAME=e-capstone-IMAGE_TAG"
+    # kubernetes.io/ingress.class: alb
+    service.beta.kubernetes.io/aws-load-balancer-type: alb
 spec:
   selector:
     app: e-capstone
@@ -41,7 +43,8 @@ spec:
         imagePullPolicy: Always
         resources:
           requests:
-            cpu: 100m        
+            cpu: 100m
+            memory: 100Mi    
         ports:
         - name: e-capstone
           containerPort: 8080
