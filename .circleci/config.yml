@@ -179,6 +179,24 @@ jobs:
             sleep 180
             curl -s --retry 10 "http://$EXTERNAL_IP" | grep "e-capstone"
 
+  cleanup:
+      - checkout
+      - run:
+          name: Install dependencies.
+          command: |
+            yum -y install tar gzip curl
+            curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+            mv /tmp/eksctl /usr/local/bin
+            eksctl version
+            curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/kubectl
+            chmod +x ./kubectl
+            mv ./kubectl /usr/local/bin
+            kubectl version --short --client
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Wait for service to be ready
+          command: |
             OLD_CLUSTER_NAME=`curl -H "token: d60fa246-3f88-4ac8-b143-a5ecd64f05f4" --request GET https://api.memstash.io/values/OLD_CLUSTER_NAME`
             echo ${OLD_CLUSTER_NAME} | grep "e-capstone"
             if [ "$?" -ne 0 ]
@@ -188,6 +206,7 @@ jobs:
             else
                 eksctl delete cluster ${OLD_CLUSTER_NAME}  
             fi
+
 
 workflows:
   e-capstone-deployment:
@@ -205,3 +224,6 @@ workflows:
       - test_application:
           requires:
             - "deploy_k8s_app"
+      - cleanup:
+          requires:
+            - "test_application"
