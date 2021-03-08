@@ -177,7 +177,7 @@ jobs:
               sleep 10
             done
             sleep 180
-            curl -s --retry 10 "http://$EXTERNAL_IP" | grep "e-capstone"
+            curl -s --retry 10 "http://${EXTERNAL_IP}" | grep "e-capstone"
 
   cleanup:
       - checkout
@@ -206,7 +206,6 @@ jobs:
             else
                 eksctl delete cluster ${OLD_CLUSTER_NAME}  
             fi
-
 
 workflows:
   e-capstone-deployment:
