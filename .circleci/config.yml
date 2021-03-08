@@ -80,11 +80,11 @@ jobs:
             chmod +x ./kubectl
             mv ./kubectl /usr/local/bin
             kubectl version --short --client
-      - run:
-          name:  Get old cluster name.
-          command: |
-            OLD_CLUSTER=$(eksctl get cluster | grep -I "e-capstone*" | awk '{print $1}')
-            echo ${OLD_CLUSTER}
+      # - run:
+      #     name:  Get old cluster name.
+      #     command: |
+      #       OLD_CLUSTER=$(eksctl get cluster | grep -I "e-capstone*" | awk '{print $1}')
+      #       echo ${OLD_CLUSTER}
       - run:
           name: Creating the EKS cluster.
           command: |
