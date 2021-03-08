@@ -147,6 +147,9 @@ jobs:
           event: on_fail
 
   test_application:
+    executor: aws
+    working_directory: ~/app
+    steps:
       - checkout
       - run:
           name: Install dependencies.
@@ -180,6 +183,9 @@ jobs:
             curl -s --retry 10 "http://${EXTERNAL_IP}" | grep "e-capstone"
 
   cleanup:
+    executor: aws
+    working_directory: ~/app
+    steps:
       - checkout
       - run:
           name: Install dependencies.
