@@ -62,7 +62,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: e-capstone
+      # app.kubernetes.io/name: e-capstone
       app: e-capstone
   template:
     metadata:
