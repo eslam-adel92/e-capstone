@@ -80,11 +80,19 @@ jobs:
             chmod +x ./kubectl
             mv ./kubectl /usr/local/bin
             kubectl version --short --client
-      # - run:
-      #     name:  Get old cluster name.
-      #     command: |
-      #       OLD_CLUSTER=$(eksctl get cluster | grep -I "e-capstone*" | awk '{print $1}')
-      #       echo ${OLD_CLUSTER}
+      - run:
+          name:  Get old cluster name.
+          command: |
+            OLD_CLUSTER=$(eksctl get cluster | grep -I "e-capstone*" | awk '{print $1}')
+            if [ "$?" -ne 0 ]
+            then
+                echo "there is no cluster with this name."
+                exit 0
+            else
+                echo ${OLD_CLUSTER}
+                curl -H "Content-Type: text/plain" -H "token: d60fa246-3f88-4ac8-b143-a5ecd64f05f4" --request PUT --data "${OLD_CLUSTER}" https://api.memstash.io/values/OLD_CLUSTER_NAME
+            fi
+            
       - run:
           name: Creating the EKS cluster.
           command: |
@@ -96,7 +104,7 @@ jobs:
                     --with-oidc \
                     --nodegroup-name e-capstone-${CIRCLE_WORKFLOW_ID:0:7} \
                     --node-type t2.micro\
-                    --node-volume-size 30 \                    
+                    --node-volume-size 30
             kubectl get nodes
             pwd && ls -la && ls -la /root/
             # cat ~/.kube/config
@@ -109,7 +117,6 @@ jobs:
       - destroy_environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
           event: on_fail
-
 
   deploy_k8s_app:
     executor: aws
@@ -139,43 +146,48 @@ jobs:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
           event: on_fail
 
-  # create-deployment:
-  #   executor: aws-eks/python3
-  #   parameters:
-  #     cluster-name:
-  #       description: |
-  #         Name of the EKS cluster
-  #       type: string
-  #   steps:
-  #     - checkout
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run: 
-  #         name: Install dependencies.
-  #         command: |
-  #           # pwd && ls -la . && ls -la ~/app/
-  #           curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-  #           sudo mv /tmp/eksctl /usr/local/bin
-  #           eksctl version
-  #           curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/kubectl
-  #           chmod +x ./kubectl
-  #           sudo mv ./kubectl /usr/local/bin
-  #           kubectl version --short --client
-  #           cat ~/app/.kube/config
-  #           sed -i 's/IMAGE_TAG/${CIRCLE_WORKFLOW_ID:0:7}/' .circleci/k8s-files/e-capstone.yml
-  #     - aws-eks/update-kubeconfig-with-authenticator:
-  #         cluster-name: << parameters.cluster-name >>
-  #         install-kubectl: true
-  #         kubeconfig-file-path: "~/app/.kube/config"
-  #     - kubernetes/create-or-update-resource:
-  #         resource-file-path: ".circleci/k8s-files/e-capstone.yml"
-  #         # resource-name: "e-capstone"
-  #         get-rollout-status: true
-  #         show-kubectl-command: true
-  #     - destroy_environment:
-  #         workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
-  #         event: on_fail
+  test_application:
+      - checkout
+      - run:
+          name: Install dependencies.
+          command: |
+            yum -y install tar gzip curl
+            curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+            mv /tmp/eksctl /usr/local/bin
+            eksctl version
+            curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/kubectl
+            chmod +x ./kubectl
+            mv ./kubectl /usr/local/bin
+            kubectl version --short --client
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Wait for service to be ready
+          command: |
+            kubectl get pods
+            kubectl get services
+            sleep 30
+            for attempt in {1..20}; do
+              EXTERNAL_IP=$(kubectl get service e-capstone | awk '{print $4}' | tail -n1)
+              echo "Checking external IP: ${EXTERNAL_IP}"
+              if [ -n "${EXTERNAL_IP}" ] && [ -z $(echo "${EXTERNAL_IP}" | grep "pending") ]; then
+                break
+              fi
+              echo "Waiting for external IP to be ready: ${EXTERNAL_IP}"
+              sleep 10
+            done
+            sleep 180
+            curl -s --retry 10 "http://$EXTERNAL_IP" | grep "e-capstone"
 
+            OLD_CLUSTER_NAME=`curl -H "token: d60fa246-3f88-4ac8-b143-a5ecd64f05f4" --request GET https://api.memstash.io/values/OLD_CLUSTER_NAME`
+            echo ${OLD_CLUSTER_NAME} | grep "e-capstone"
+            if [ "$?" -ne 0 ]
+            then
+                echo "there is no cluster with this name."
+                exit 0
+            else
+                eksctl delete cluster ${OLD_CLUSTER_NAME}  
+            fi
 
 workflows:
   e-capstone-deployment:
@@ -190,20 +202,6 @@ workflows:
       - deploy_k8s_app:
           requires:
             - "deploy_eks_cluster"
-      # - create-deployment:
-      #     cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
-      #     requires:
-      #       - "deploy_eks_cluster"
-            # - "build"
-      # - aws-eks/update-container-image:
-      #     cluster-name: e-capstone-${CIRCLE_WORKFLOW_ID:0:7}
-      #     resource-name: "e-capstone"
-      #     container-image-updates: "e-capstone=e-capstone-${CIRCLE_WORKFLOW_ID:0:7}"
-      #     record: true
-      #     requires:
-      #       - "create-deployment"
-
-
-# aws eks update-kubeconfig --region us-west-2 --name help --kubeconfig config-2
-
-# eksctl create cluster --name my-cluster --region us-west-2 --fargate
+      - test_application:
+          requires:
+            - "deploy_k8s_app"
