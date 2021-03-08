@@ -3,13 +3,13 @@ kind: Service
 metadata:
   name:  e-capstone
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "NAME=e-capstone-IMAGE_TAG"
+    # service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "NAME=e-capstone-IMAGE_TAG"
 spec:
   selector:
     app: e-capstone
   type: LoadBalancer
   ports:
-  - name:  e-capstone-http
+  - name:  e-capstone
     port:  80
     targetPort: e-capstone
   # - name:  e-capstone-https
@@ -66,8 +66,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: e-capstone
-  minReplicas: 1
-  maxReplicas: 3
+  minReplicas: 2
+  maxReplicas: 10
   metrics:
   - type: Resource
     resource:
