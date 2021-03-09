@@ -167,8 +167,8 @@ jobs:
       - run:
           name: Wait for service to be ready
           command: |
-            kubectl get pods
-            kubectl get services
+            kubectl --kubeconfig ~/app/.kube/config get pods
+            kubectl --kubeconfig ~/app/.kube/config get services
             sleep 30
             for attempt in {1..20}; do
               EXTERNAL_IP=$(kubectl get service e-capstone | awk '{print $4}' | tail -n1)
