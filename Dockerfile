@@ -6,7 +6,7 @@ COPY hello.py /app/
 WORKDIR /app
 RUN pip install --no-cache-dir Flask==1.1.2
 
-COPY hello.py /app/hello.py
+ADD hello.py /app/hello.py
 
 EXPOSE 8080
 

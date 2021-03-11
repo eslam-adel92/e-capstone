@@ -83,12 +83,13 @@ jobs:
       - run:
           name:  Get old cluster name.
           command: |
-            OLD_CLUSTER=$(eksctl get cluster | grep -I "e-capstone*" | awk '{print $1}' | tail -n1)
+            eksctl get cluster | grep -I "e-capstone*" | awk '{print $1}'
             if [ "$?" -ne 0 ]
             then
                 echo "there is no cluster with this name."
                 exit 0
             else
+                OLD_CLUSTER=$(eksctl get cluster | grep -I "e-capstone*" | awk '{print $1}' | tail -n1)
                 echo ${OLD_CLUSTER}
                 curl -H "Content-Type: text/plain" -H "token: d60fa246-3f88-4ac8-b143-a5ecd64f05f4" --request PUT --data "${OLD_CLUSTER}" https://api.memstash.io/values/OLD_CLUSTER_NAME
             fi
