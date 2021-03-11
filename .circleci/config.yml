@@ -84,7 +84,7 @@ jobs:
           name:  Get old cluster name.
           command: |
             eksctl get cluster | grep -I "No clusters found"
-            echo $?
+            # echo $?
             if [ "$?" -eq 0 ]
             then
                 echo "there is no cluster with this name."
@@ -204,11 +204,11 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Wait for service to be ready
+          name: Clear old Environment.
           command: |
             OLD_CLUSTER_NAME=`curl -H "token: d60fa246-3f88-4ac8-b143-a5ecd64f05f4" --request GET https://api.memstash.io/values/OLD_CLUSTER_NAME`
-            echo ${OLD_CLUSTER_NAME} | grep "e-capstone"
-            if [ "$?" -ne 0 ]
+            echo ${OLD_CLUSTER_NAME} | grep -i "No value matches"
+            if [ "$?" -eq 0 ]
             then
                 echo "there is no cluster with this name."
                 exit 0
