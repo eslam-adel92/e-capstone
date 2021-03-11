@@ -83,7 +83,7 @@ jobs:
       - run:
           name:  Get old cluster name.
           command: |
-            if `eksctl get cluster | grep -I "No clusters found"`
+            if eksctl get cluster | grep -i "No clusters found"
             then
                 echo -e "there is no cluster with this name."
                 exit 0
@@ -207,7 +207,7 @@ jobs:
             OLD_CLUSTER_NAME=`curl -H "token: d60fa246-3f88-4ac8-b143-a5ecd64f05f4" --request GET https://api.memstash.io/values/OLD_CLUSTER_NAME`
             # echo ${OLD_CLUSTER_NAME} | grep -i "No value matches"
             # if [ "$?" -eq 0 ]
-            if `echo ${OLD_CLUSTER_NAME} | grep -i "No value matches"`
+            if echo ${OLD_CLUSTER_NAME} | grep -i "No value matches"
             then
                 echo "there is no cluster with this name."
                 exit 0
