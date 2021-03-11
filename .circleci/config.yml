@@ -84,7 +84,7 @@ jobs:
           name:  Get old cluster name.
           command: |
             eksctl get cluster | grep -I "No clusters found"
-            # echo $?
+            echo $?
             if [ "$?" -eq 0 ]
             then
                 echo "there is no cluster with this name."
