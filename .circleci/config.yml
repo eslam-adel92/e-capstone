@@ -85,7 +85,7 @@ jobs:
           command: |
             eksctl get cluster | grep -I "No clusters found"
             echo $?
-            if [ "$?" -e 0 ]
+            if [ "$?" -eq 0 ]
             then
                 echo "there is no cluster with this name."
                 exit 0
