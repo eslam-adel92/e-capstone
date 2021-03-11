@@ -83,12 +83,9 @@ jobs:
       - run:
           name:  Get old cluster name.
           command: |
-            # eksctl get cluster | grep -I "No clusters found"
-            # echo $?
-            # if [ "$?" -eq 0 ]
             if `eksctl get cluster | grep -I "No clusters found"`
             then
-                echo "there is no cluster with this name."
+                echo -e "there is no cluster with this name."
                 exit 0
             else
                 OLD_CLUSTER=$(eksctl get cluster | grep -I "e-capstone*" | awk '{print $1}' | tail -n1)
