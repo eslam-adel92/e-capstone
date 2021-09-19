@@ -72,7 +72,7 @@ spec:
     spec:      
       containers:
       - name: e-capstone
-        image: eslam2017/e-capstone:IMAGE_TAG
+        image: eslam2017/e-capstone:latest
         imagePullPolicy: Always
         resources:
           requests:
