@@ -9,7 +9,7 @@ metadata:
 spec:
   selector:
     app: e-capstone
-  #type: LoadBalancer
+  type: LoadBalancer
   ports:
   - name:  e-capstone
     port:  80
