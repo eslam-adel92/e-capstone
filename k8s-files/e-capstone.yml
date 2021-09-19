@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name:  e-capstone
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "NAME=e-capstone-IMAGE_TAG"
+    # kubernetes.io/ingress.class: alb
+    service.beta.kubernetes.io/aws-load-balancer-type: alb
+spec:
+  selector:
+    app: e-capstone
+  type: LoadBalancer
+  ports:
+  - name:  e-capstone
+    port:  80
+    targetPort: 8080
+  # - name:  e-capstone-https
+  #   port:  443
+  #   targetPort: e-capstone
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   # namespace: game-2048
+#   name: e-capstone
+# spec:
+#   ports:
+#     - port: 80
+#       targetPort: 8080
+#       protocol: TCP
+#   type: NodePort
+#   selector:
+#     app.kubernetes.io/name: e-capstone
+#     app: e-capstone
+# ---
+# apiVersion: extensions/v1beta1
+# kind: Ingress
+# metadata:
+#   # namespace: game-2048
+#   name: e-capstone
+#   annotations:
+#     kubernetes.io/ingress.class: alb
+#     alb.ingress.kubernetes.io/scheme: internet-facing
+#     alb.ingress.kubernetes.io/target-type: ip
+# spec:
+#   rules:
+#     - http:
+#         paths:
+#           - path: /*
+#             backend:
+#               serviceName: e-capstone
+#               servicePort: 80
+# e-capstone Deployment.
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: e-capstone
+  labels:
+    app: e-capstone
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      # app.kubernetes.io/name: e-capstone
+      app: e-capstone
+  template:
+    metadata:
+      name: e-capstone
+      labels:
+        app: e-capstone   
+    spec:      
+      containers:
+      - name: e-capstone
+        image: eslam2017/e-capstone:IMAGE_TAG
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi    
+        ports:
+        - name: e-capstone
+          containerPort: 8080
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 5
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+---
+# Add Horizontal Pod Autoscaler object
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: e-capstone
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: e-capstone
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 80
