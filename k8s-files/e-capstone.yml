@@ -2,14 +2,14 @@ apiVersion: v1
 kind: Service
 metadata:
   name:  e-capstone
-  annotations:
-    service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "NAME=e-capstone-IMAGE_TAG"
-    # kubernetes.io/ingress.class: alb
-    service.beta.kubernetes.io/aws-load-balancer-type: alb
+  #annotations:
+    #service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "NAME=e-capstone-IMAGE_TAG"
+    #kubernetes.io/ingress.class: alb
+    #service.beta.kubernetes.io/aws-load-balancer-type: alb
 spec:
   selector:
     app: e-capstone
-  type: LoadBalancer
+  #type: LoadBalancer
   ports:
   - name:  e-capstone
     port:  80
