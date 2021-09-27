@@ -1,4 +1,4 @@
-name: build and push laravel docker image.
+name: build and push python app hostname docker image.
 on:
   push:
     branches:
@@ -10,10 +10,10 @@ jobs:
       - 
         name: git branch and commit hash
         git_hash=$(git rev-parse --short "$GITHUB_SHA")
-        git_branch=${GITHUB_REF#refs/heads/}
+        # git_branch=${GITHUB_REF#refs/heads/}
         run: |
           echo $git_hash
-          echo git_branch
+          # echo git_branch
 
       # -
       #   name: Set up QEMU
