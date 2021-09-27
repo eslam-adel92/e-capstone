@@ -2,55 +2,14 @@ apiVersion: v1
 kind: Service
 metadata:
   name:  e-capstone
-  #annotations:
-    #service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "NAME=e-capstone-IMAGE_TAG"
-    #kubernetes.io/ingress.class: alb
-    #service.beta.kubernetes.io/aws-load-balancer-type: alb
 spec:
   selector:
     app: e-capstone
-  type: LoadBalancer
+  type: ClusterIP
   ports:
   - name:  e-capstone
     port:  80
     targetPort: 8080
-  # - name:  e-capstone-https
-  #   port:  443
-  #   targetPort: e-capstone
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   # namespace: game-2048
-#   name: e-capstone
-# spec:
-#   ports:
-#     - port: 80
-#       targetPort: 8080
-#       protocol: TCP
-#   type: NodePort
-#   selector:
-#     app.kubernetes.io/name: e-capstone
-#     app: e-capstone
-# ---
-# apiVersion: extensions/v1beta1
-# kind: Ingress
-# metadata:
-#   # namespace: game-2048
-#   name: e-capstone
-#   annotations:
-#     kubernetes.io/ingress.class: alb
-#     alb.ingress.kubernetes.io/scheme: internet-facing
-#     alb.ingress.kubernetes.io/target-type: ip
-# spec:
-#   rules:
-#     - http:
-#         paths:
-#           - path: /*
-#             backend:
-#               serviceName: e-capstone
-#               servicePort: 80
-# e-capstone Deployment.
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -62,7 +21,6 @@ spec:
   replicas: 2
   selector:
     matchLabels:
-      # app.kubernetes.io/name: e-capstone
       app: e-capstone
   template:
     metadata:
@@ -73,7 +31,7 @@ spec:
       containers:
       - name: e-capstone
         image: eslam2017/e-capstone:latest
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         resources:
           requests:
             cpu: 100m

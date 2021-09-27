@@ -10,4 +10,4 @@ COPY hello.py /app/hello.py
 
 EXPOSE 8080
 
-CMD ["python","/app/hello.py"]
+CMD ["python","/app/gethostname.py"]
