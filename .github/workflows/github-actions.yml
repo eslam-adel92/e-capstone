@@ -4,31 +4,27 @@ on:
     branches:
       - 'main'
 jobs:
-  docker:
+  e-capstone_build:
     runs-on: ubuntu-latest
     steps:
-      - 
-        name: git branch and commit hash
-        # git_branch=${GITHUB_REF#refs/heads/}
+      - uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: git branch and commit hash
         run: |
+          git_branch=${GITHUB_REF#refs/heads/}
           git_hash=$(git rev-parse --short "$GITHUB_SHA")
           echo $git_hash
-          # echo git_branch
-
-      # -
-      #   name: Set up QEMU
-      #   uses: docker/setup-qemu-action@v1
-      # -
-      #   name: Set up Docker Buildx
-      #   uses: docker/setup-buildx-action@v1
-      # -
-      #   name: Login to DockerHub
+          echo git_branch
+      # - name: Login to DockerHub
       #   uses: docker/login-action@v1 
       #   with:
       #     username: ${{ secrets.DOCKER_HUB_UN }}
       #     password: ${{ secrets.DOCKER_HUB_PW }}
-      # -
-      #   name: Build and push
+      # - name: Build and push
       #   id: docker_build
       #   uses: docker/build-push-action@v2
       #   with:
