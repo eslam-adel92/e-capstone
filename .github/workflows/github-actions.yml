@@ -24,10 +24,15 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_UN }}
           password: ${{ secrets.DOCKER_HUB_PW }}
-      - name: Build and push
+      - name: Build and push with latest tag
         id: docker_build
         uses: docker/build-push-action@v2
         with:
           push: true
           tags: eslam2017/e-capstone:latest
+      - name: Build and push with branch name & commit hash tag
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          push: true          
           tags: eslam2017/e-capstone:${git_branch}-${git_hash}
