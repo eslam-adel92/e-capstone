@@ -31,4 +31,4 @@ jobs:
           push: true
           tags: 
             eslam2017/e-capstone:latest
-            eslam2017/e-capstone:${git_branch}-${git_hash}
+            eslam2017/e-capstone:${GITHUB_REF#refs/heads/}-$(git rev-parse --short "$GITHUB_SHA")
