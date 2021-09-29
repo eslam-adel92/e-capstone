@@ -31,7 +31,7 @@ jobs:
           tags: |
             type=ref,event=tag
             # dynamically set the branch name as a prefix
-            type=sha,prefix={{branch}}-
+            # type=sha,prefix={{branch}}-
             # dynamically set the branch name and sha as a custom tag
             type=raw,value={{branch}}-{{sha}}
 
