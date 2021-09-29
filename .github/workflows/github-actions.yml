@@ -28,12 +28,12 @@ jobs:
           images: eslam2017/e-capstone
         # flavor: |
         #   latest=auto   
-        tags: |
-          type=ref,event=tag
-          # dynamically set the branch name as a prefix
-          # type=sha,prefix={{branch}}-
-          # dynamically set the branch name and sha as a custom tag
-          type=raw,value={{branch}}-{{sha}}
+          tags: |
+            type=ref,event=tag
+            # dynamically set the branch name as a prefix
+            # type=sha,prefix={{branch}}-
+            # dynamically set the branch name and sha as a custom tag
+            type=raw,value={{branch}}-{{sha}}
 
       - name: Login to DockerHub
         id: docker_login
