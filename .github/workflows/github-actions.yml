@@ -26,8 +26,8 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: eslam2017/e-capstone
-        # flavor: |
-        #   latest=auto   
+          flavor: |
+            latest=auto   
           tags: |
             type=ref,event=tag
             type=raw,value={{branch}}-{{sha}}
