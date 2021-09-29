@@ -29,7 +29,6 @@ jobs:
         flavor: |
           latest=auto          
         tags: |
-          tags: |
           # dynamically set the branch name as a prefix
           # type=sha,prefix={{branch}}-
           # dynamically set the branch name and sha as a custom tag
