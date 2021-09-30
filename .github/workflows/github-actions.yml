@@ -28,8 +28,9 @@ jobs:
           images: eslam2017/e-capstone
           flavor: |
             latest=auto   
-          tags: |            
+          tags: |
             type=raw,value={{branch}}-{{sha}}
+            type=raw,value=latest
 
       - name: Login to DockerHub
         id: docker_login
