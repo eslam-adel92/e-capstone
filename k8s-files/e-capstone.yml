@@ -31,7 +31,7 @@ spec:
       containers:
       - name: e-capstone
         image: eslam2017/e-capstone:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         resources:
           requests:
             cpu: 100m
