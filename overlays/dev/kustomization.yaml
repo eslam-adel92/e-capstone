@@ -9,4 +9,4 @@ resources:
 
 images:
 - name: eslam2017/e-capstone
-  newTag: latest
+  newTag: main-af60c09
