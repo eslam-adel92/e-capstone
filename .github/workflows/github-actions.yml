@@ -48,7 +48,7 @@ jobs:
             # eslam2017/e-capstone:latest
             # eslam2017/e-capstone:${{ steps.tag.outputs.IMAGE_TAG }}
             # eslam2017/e-capstone:${{ steps.meta.outputs.tags }}
-
+name: build and push python app hostname docker image on dev branch.
 on:
   push:
     branches:
