@@ -3,9 +3,10 @@ kind: Kustomization
 
 resources:
 - ../../base
-
-# patchesStrategicMerge:
-# - ./e-capstone-patch.yml
+commonLabels:
+  version: v1
+patchesStrategicMerge:
+- ./e-capstone-patch.yml
 
 images:
 - name: eslam2017/e-capstone
