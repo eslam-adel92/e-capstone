@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def gethostname():
-    s = 'Container ID is: ' + socket.gethostname()
+    s = 'Container ID is: ' + socket.gethostname() + "This is the dev branch."
     return s
 
 if __name__ == '__main__':
