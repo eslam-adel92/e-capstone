@@ -9,4 +9,4 @@ resources:
 
 images:
 - name: eslam2017/e-capstone
-  newTag: main-af60c09
+  newTag: dev-9b29c76
